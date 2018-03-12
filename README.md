@@ -2,3 +2,6 @@
 
 101 Tutorial for technologies:
  - golang
+   - slice vs array
+   - defercall benchmark
+   - gcflags
