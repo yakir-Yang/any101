@@ -5,3 +5,6 @@
    - slice vs array
    - defercall benchmark
    - gcflags
+
+ - dockerfile
+   - ubuntu kernel debpkg
