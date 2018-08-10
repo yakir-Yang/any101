@@ -17,3 +17,6 @@
    - dropwatch
 
  - netlink
+
+ - openssl
+   - cheat sheet style guide
