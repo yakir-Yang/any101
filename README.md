@@ -8,6 +8,7 @@
    - tag in structure
    - http server
    - cgi server
+   - http handler
 
  - dockerfile
    - ubuntu kernel debpkg
