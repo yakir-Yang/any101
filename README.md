@@ -9,6 +9,7 @@
    - http server
    - cgi server
    - http handler
+   - json
 
  - dockerfile
    - ubuntu kernel debpkg
