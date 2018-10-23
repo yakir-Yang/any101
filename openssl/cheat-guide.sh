@@ -23,6 +23,7 @@ default_md         = sha512
 prompt             = no
 encrypt_key        = no
 distinguished_name = req_distinguished_name
+req_extensions = v3_req
 
 [ req_distinguished_name ]
 countryName            = "DE"                     # C=
@@ -31,6 +32,12 @@ organizationName       = "My Company"             # O=
 organizationalUnitName = "Departement"            # OU=
 commonName             = "localhost"              # CN=
 emailAddress           = "server@ca.com"          # CN/emailAddress=
+
+[v3_req]
+subjectAltName = @alt_names
+
+[alt_names]
+IP.1 = 127.0.0.1
 EOF
 
 cat > client_cert.conf << EOF
@@ -40,6 +47,7 @@ default_md         = sha512
 prompt             = no
 encrypt_key        = no
 distinguished_name = req_distinguished_name
+req_extensions = v3_req
 
 [ req_distinguished_name ]
 countryName            = "DE"                     # C=
@@ -48,6 +56,12 @@ organizationName       = "My Company"             # O=
 organizationalUnitName = "Departement"            # OU=
 commonName             = "localhost"              # CN=
 emailAddress           = "client@ca.com"          # CN/emailAddress=
+
+[v3_req]
+subjectAltName = @alt_names
+
+[alt_names]
+IP.1 = 127.0.0.1
 EOF
 
 mkdir ca
@@ -72,9 +86,11 @@ openssl req -out client.req -key client.key -new \
 openssl x509 -req -in ca.req -out ca.crt \
             -days 5000 -signkey ca.key
 openssl x509 -req -in server.req -out server.crt \
+            -extensions v3_req -extfile ./server_cert.conf \
             -CAcreateserial -days 5000 \
             -CA ca.crt -CAkey ca.key
 openssl x509 -req -in client.req -out client.crt \
+            -extensions v3_req -extfile ./client_cert.conf \
             -CAcreateserial -days 5000 \
             -CA ca.crt -CAkey ca.key
 
