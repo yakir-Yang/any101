@@ -24,3 +24,7 @@
 
  - openssl
    - cheat sheet style guide
+
+ - GNU
+   - constructor
+   - destructor
