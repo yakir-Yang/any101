@@ -1,0 +1,22 @@
+version: "3"
+services:
+    proxy:
+        image: nginx
+        ports:
+            - "3306:3306"
+        volumes:
+            - ./nginx.conf:/etc/nginx/nginx.conf
+
+    app1:
+        build:
+            context: app/
+        ports:
+            - "8001:3306"
+        command: "netcat -l -p 3306"
+
+    app2:
+        build:
+            context: app/
+        ports:
+            - "8002:3306"
+        command: "netcat -l -p 3306"
