@@ -1,0 +1,32 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: busybox-test
+  namespace: default
+  labels:
+    app: busybox-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: busybox-test
+  template:
+    metadata:
+      labels:
+        app: busybox-test
+    spec:
+      containers:
+      - name: busybox-test
+        image: ubuntu
+        command: ["/bin/sh", "-c", "--"]
+        args: [ "while true; do sleep 30; echo \"--\"; done;" ]
+        initContainers:
+        - name: ulimit
+          image: busybox
+          command: ["sh", "-c", "ulimit -c unlimited"]
+        - name: sysctl
+          image: busybox
+          command: ["sh", "-c", "sysctl -w kernel.core_pattern=/var/crash/core-%p.%s.%c"]
+          securityContext:
+            privileged: true
+      terminationGracePeriodSeconds: 10
