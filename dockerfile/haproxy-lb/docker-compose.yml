@@ -1,0 +1,57 @@
+version: '2'
+services:
+  front-haproxy:
+    image: haproxy:1.9.4-alpine
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    networks:
+      - haproxymesh
+    expose:
+      - "80"
+    ports:
+      - "8010:80"
+
+  service1_1:
+    build:
+      context: .
+      dockerfile: Dockerfile-service
+    networks:
+      haproxymesh:
+        aliases:
+          - service1_1
+    environment:
+      - SERVICE_NAME=1
+    expose:
+      - "8080"
+
+
+  service1_2:
+    build:
+      context: .
+      dockerfile: Dockerfile-service
+    networks:
+      haproxymesh:
+        aliases:
+          - service1_2
+    environment:
+      - SERVICE_NAME=1
+    expose:
+      - "8080"
+
+
+  service2:
+    build:
+      context: .
+      dockerfile: Dockerfile-service
+    networks:
+      haproxymesh:
+        aliases:
+          - service2
+    environment:
+      - SERVICE_NAME=2
+    expose:
+      - "8080"
+
+
+networks:
+  haproxymesh: {}
