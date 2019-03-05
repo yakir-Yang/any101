@@ -1,0 +1,63 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: liveness
+  labels:
+    app: liveness
+spec:
+  selector:
+    app: liveness
+  ports:
+    - port: 9200
+      name: liveness-port
+
+---
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  labels:
+    app: liveness
+  name: liveness
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: liveness
+  template:
+    metadata:
+      labels:
+        app: liveness
+    spec:
+      containers:
+      - name: liveness
+        image: ubuntu
+        command: ["/bin/bash", "-c"]
+        args:
+        - echo "Start";
+          for i in `seq 20`; do
+              sleep .5;
+              echo -n ".";
+          done;
+          echo -e "\nReady";
+          touch /tmp/ready;
+          for i in `seq 20`; do
+              sleep .5;
+              echo -n ".";
+          done;
+          echo -e "\nNotReady";
+          rm /tmp/ready;
+          sleep 600;
+        ports:
+        - containerPort: 9200
+          name: liveness-port
+          protocol: TCP
+        readinessProbe:
+          exec:
+            command:
+            - cat
+            - /tmp/ready
+          periodSeconds: 1
+      nodeSelector:
+        kubernetes.io/hostname: kube-node-1
+      restartPolicy: Always
