@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: ubuntu-deployment
+    labels:
+        app: kk
+spec:
+    selector:
+        matchLabels:
+            app: kk
+    template:
+        metadata:
+            labels:
+                app: kk
+        spec:
+            containers:
+            - name: ubuntu
+              image: ubuntu:16.04
+              command: ["/bin/bash", "-c", "--"]
+              args: [ "while true; do sleep 30; echo \"--\"; done;" ]
+            restartPolicy: Always
