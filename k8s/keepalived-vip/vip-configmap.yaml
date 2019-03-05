@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vip-configmap
+  labels:
+    app: kube-keepalived-vip
+data:
+  10.192.0.5: default/nginx
