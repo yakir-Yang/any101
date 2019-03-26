@@ -1,6 +1,11 @@
 # any101
 
 101 Tutorial for technologies:
+ - kubernetes
+   - elk
+   - keepalived
+   - ubuntu
+
  - golang
    - slice vs array
    - defercall benchmark
