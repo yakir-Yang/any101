@@ -1,0 +1,134 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebeat-config
+  namespace: kube-logging
+  labels:
+    name: counter
+data:
+  filebeat.yml: |-
+    filebeat.config:
+      prospectors:
+        # Mounted `filebeat-prospectors` configmap:
+        path: ${path.config}/prospectors.d/*.yml
+        # Reload prospectors configs as they change:
+        reload.enabled: true
+        enabled: true
+      modules:
+        path: ${path.config}/modules.d/*.yml
+        # Reload module configs as they change:
+        reload.enabled: false
+
+    processors:
+      - add_cloud_metadata:
+
+    cloud.id: ${ELASTIC_CLOUD_ID}
+    cloud.auth: ${ELASTIC_CLOUD_AUTH}
+
+    output.console.pretty: true
+    #output.elasticsearch:
+    #  hosts: ['${ELASTICSEARCH_HOST:elasticsearch}:${ELASTICSEARCH_PORT:9200}']
+    #  username: elasticsearch
+    #  password: changeme 
+    #  index: "counter"
+    #setup.template.name: "counter"
+    #setup.template.pattern: "counter"
+    #
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebeat-prospectors
+  namespace: kube-logging
+  labels:
+    name: counter
+data:
+  counter.yml: |-
+    - paths: ["/var/log/*.log"]
+      tags: ["kk"]
+      fileds:
+        type: "normal"
+        app_id: query_engine_12
+---
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: counter
+  namespace: kube-logging
+  labels:
+    app: counter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: counter
+  template:
+    metadata:
+      labels:
+        app: counter
+    spec:
+      containers:
+      - name: counter
+        image: busybox
+        args: [/bin/sh, -c,
+               'i=0; while true; do echo "$i: $(date)"; i=$((i+1)); sleep 1; done']
+               #'i=0; while true; do echo "$i: $(date)" >> /var/log/counter.log; i=$((i+1)); sleep 1; done']
+        volumeMounts:
+        - name: varlog
+          mountPath: /var/log
+      - name: filebeat
+        image: docker.elastic.co/beats/filebeat:6.1.4
+        args: [
+          "-c", "/etc/filebeat.yml",
+          "-e",
+        ]
+        env:
+        - name: ELASTICSEARCH_HOST
+          value: elasticsearch
+        - name: ELASTICSEARCH_PORT
+          value: "9200"
+        - name: ELASTICSEARCH_USERNAME
+          value: elastic
+        - name: ELASTICSEARCH_PASSWORD
+          value: changeme
+        - name: ELASTIC_CLOUD_ID
+          value:
+        - name: ELASTIC_CLOUD_AUTH
+          value:
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        volumeMounts:
+        - name: varlog
+          mountPath: /var/log
+        - name: filebeatconfig
+          mountPath: /etc/filebeat.yml
+          subPath: filebeat.yml
+        - name: filebeatprospectors
+          mountPath: /usr/share/filebeat/prospectors.d
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        - name: pod_name
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+      volumes:
+      - name: varlog
+        emptyDir: {}
+      - name: filebeatprospectors
+        configMap:
+          name: filebeat-prospectors
+      - name: filebeatconfig
+        configMap:
+          name: filebeat-config

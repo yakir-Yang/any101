@@ -1,0 +1,146 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: logstash
+  namespace: kube-logging
+  labels:
+    app: logstash
+spec:
+  ports:
+  - port: 5000
+  selector:
+    app: logstash
+
+---
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: logstash
+  namespace: kube-logging
+  labels:
+    name: logtash
+data:
+  pressure-source.conf: |-
+    input {
+      generator{
+        count => 100000
+      }
+    }
+    output {
+      file {
+        path => "/tmp/pressure-source.log"
+      }
+    }
+
+  pressure-json-codec.conf: |-
+    input {
+      file {
+        path => "/tmp/pressure-source.log"
+        codec => json
+        start_position => "beginning"
+      }
+    }
+    filter {
+      ruby {
+        code => "event.set('tag', Time.now)"
+      }
+    }
+    output {
+      file {
+        path => "/tmp/pressure-json-codec.log"
+      }
+    }
+
+  pressure-plain-codec.conf: |-
+    input {
+      file {
+        path => "/tmp/pressure-source.log"
+        codec => plain
+        start_position => "beginning"
+      }
+    }
+    filter {
+      ruby {
+        code => "event.set('tag', Time.now)"
+      }
+    }
+    output {
+      file {
+        path => "/tmp/pressure-plain-codec.log"
+      }
+    }
+
+  logstash.yml: |-
+    http.host: "0.0.0.0"
+    xpack.monitoring.enabled: false
+
+  pipelines.yml: |-
+    - pipeline.id: main
+      pipeline.batch.size: 125
+      queue.type: memory
+      path.config: "/usr/share/logstash/pipeline/pressure-source.conf"
+    - pipeline.id: pressure-json-codec
+      queue.type: memory
+      path.config: "/usr/share/logstash/pipeline/pressure-json-codec.conf"
+    - pipeline.id: pressure-plain-codec
+      queue.type: memory
+      path.config: "/usr/share/logstash/pipeline/pressure-plain-codec.conf"
+
+---
+
+kind: DaemonSet
+apiVersion: apps/v1
+metadata:
+  name: logstash
+  namespace: kube-logging
+  labels:
+    app: logstash
+spec:
+  selector:
+    matchLabels:
+      app: logstash
+  template:
+    metadata:
+      labels:
+        app: logstash
+    spec:
+      tolerations:
+      - key: name-role.kubernetes.io/master
+        effect: NoSchedule
+      containers:
+      - name: logstash
+        image: docker.elastic.co/logstash/logstash:6.5.4
+        volumeMounts:
+        - name: logstashconf
+          mountPath: /usr/share/logstash/pipeline/
+        - name: logstashyml
+          mountPath: /usr/share/logstash/config/logstash.yml
+          subPath: logstash.yml
+        - name: pipelinesyml
+          mountPath: /usr/share/logstash/config/pipelines.yml
+          subPath: pipelines.yml
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: logstashconf
+        configMap:
+          name: logstash
+          items:
+            - key: pressure-source.conf
+              path: pressure-source.conf
+            - key: pressure-json-codec.conf
+              path: pressure-json-codec.conf
+            - key: pressure-plain-codec.conf
+              path: pressure-plain-codec.conf
+      - name: logstashyml
+        configMap:
+          name: logstash
+          items:
+            - key: logstash.yml
+              path: logstash.yml
+      - name: pipelinesyml
+        configMap:
+          name: logstash
+          items:
+            - key: pipelines.yml
+              path: pipelines.yml

@@ -1,0 +1,29 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: counter
+  namespace: kube-logging
+  labels:
+    app: counter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: counter
+  template:
+    metadata:
+      labels:
+        app: counter
+    spec:
+      containers:
+      - name: counter
+        image: busybox
+        args: [/bin/sh, -c,
+               'i=0; while true; do echo "$i: $(date)"; i=$((i+1)); sleep 1; done']
+               #'i=0; while true; do echo "$i: $(date)" >> /var/log/counter.log; i=$((i+1)); sleep 1; done']
+        volumeMounts:
+        - name: varlog
+          mountPath: /var/log
+      volumes:
+      - name: varlog
+        emptyDir: {}
