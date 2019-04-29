@@ -1,0 +1,38 @@
+POST /_ingest/pipeline/_simulate?pretty
+{
+  "pipeline": {
+    "description" : "parse multiple patterns",
+    "processors": [
+      {
+        "split": {
+          "field": "message",
+          "separator": "\n",
+          "ignore_missing": true
+        }
+      },
+      {
+        "json": {
+          "field": "message"
+        }
+      },
+      {
+        "script": {
+          "lang": "painless",
+          "source": "def log = ''; for (l in ctx.message) {log += l.log + '\n';} ctx.log = log;"
+        }
+      },
+      {
+        "remove": {
+          "field": "message"
+        }
+      }
+    ]
+  },
+  "docs":[
+    {
+      "_source": {
+        "message": "{\"log\": \"This is KK\"}\n{\"log\": \"This is FX\"}"
+      }
+    }
+  ]
+}
