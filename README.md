@@ -7,6 +7,7 @@
    - ubuntu
 
  - golang
+   - closure
    - slice vs array
    - defercall benchmark
    - gcflags
