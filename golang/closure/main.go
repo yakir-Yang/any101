@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"time"
+	"sync"
 )
 
 func myfunc(i int) func() int {
@@ -55,12 +55,16 @@ func main() {
 		f()
 	}
 
+	var wg sync.WaitGroup
+
 	s := []string{"a", "b", "c"}
+	wg.Add(3)
 	for _, v := range s {
 		go func(v string) {
+			defer wg.Done()
 			fmt.Println(v)
 		}(v)
 	}
 
-	time.Sleep(time.Second)
+	wg.Wait()
 }

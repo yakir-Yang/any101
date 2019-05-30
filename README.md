@@ -6,17 +6,6 @@
    - keepalived
    - ubuntu
 
- - golang
-   - closure
-   - slice vs array
-   - defercall benchmark
-   - gcflags
-   - tag in structure
-   - http server
-   - cgi server
-   - http handler
-   - json
-
  - dockerfile
    - ubuntu kernel debpkg
 
@@ -37,3 +26,22 @@
  - GNU
    - constructor
    - destructor
+
+ - golang
+   - cgi server
+   - channel
+   - closure
+   - compare
+   - context
+   - defercall benchmark
+   - gcflags
+   - http handler
+   - http server
+   - interface
+   - json
+   - map
+   - panic
+   - producer-consumer
+   - slice vs array
+   - tag in structure
+   - type
