@@ -37,6 +37,9 @@ func main() {
 		})
 	}()
 
+	defer fmt.Println(recover()) // still not used
+	defer recover()              // not used
+
 	a := [2]int{1, 2}
 	b := [2]int{1, 2}
 	fmt.Println(a == b)

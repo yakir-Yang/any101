@@ -35,4 +35,12 @@ func main() {
 	fmt.Printf("&s2[0] = %p\n", &s2[0])
 	arraytest(s2)
 	fmt.Printf("arraytest(s2) = %v [%p]\n", s2, &s2)
+
+	fmt.Printf("\n")
+
+	// reslice would affect origin slice
+	s3 := [...]int{1, 2, 3, 4, 5, 6}
+	res := s3[2:4]
+	res = append(res, 123)
+	fmt.Println(res, s3)
 }

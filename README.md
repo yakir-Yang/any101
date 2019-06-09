@@ -48,3 +48,7 @@
    - slice vs array
    - tag in structure
    - type
+   - anonymous
+   - broadcast
+   - generics
+   - reflect
