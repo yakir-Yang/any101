@@ -1,0 +1,28 @@
+From 89c7cba29416013a12a5f2dad07e0e6e27099ca2 Mon Sep 17 00:00:00 2001
+From: Kuankuan Yang <kkyang@astri.org>
+Date: Thu, 28 Feb 2019 15:57:17 +0800
+Subject: [PATCH 2/2] project.config: allow 'Non-Interactive Users' to submit
+ code
+
+Allowing Jenkins robot submit change automatically.
+
+Signed-off-by: Kuankuan Yang <kkyang@astri.org>
+---
+ project.config | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/project.config b/project.config
+index bd7bee5..3d1080c 100644
+--- a/project.config
++++ b/project.config
+@@ -32,6 +32,7 @@
+ 	label-Code-Review = -1..+1 group Registered Users
+ 	submit = group Administrators
+ 	submit = group Project Owners
++	submit = group Non-Interactive Users
+ 	editTopicName = +force group Administrators
+ 	editTopicName = +force group Project Owners
+ 	label-Verified = -1..+1 group Administrators
+-- 
+2.7.4
+

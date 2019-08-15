@@ -1,0 +1,40 @@
+From 17331c22b8b90eaefadb4321c0d41374d71224c2 Mon Sep 17 00:00:00 2001
+From: Kuankuan Yang <kkyang@astri.org>
+Date: Thu, 28 Feb 2019 15:53:47 +0800
+Subject: [PATCH 1/2] project.config: add a 'Verified' label
+
+Adding a 'Verified' label for Jenkins robot to auto-verify changes.
+
+Signed-off-by: Kuankuan Yang <kkyang@astri.org>
+---
+ project.config | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/project.config b/project.config
+index a45ed2a..bd7bee5 100644
+--- a/project.config
++++ b/project.config
+@@ -34,6 +34,10 @@
+ 	submit = group Project Owners
+ 	editTopicName = +force group Administrators
+ 	editTopicName = +force group Project Owners
++	label-Verified = -1..+1 group Administrators
++	label-Verified = -1..+1 group Project Owners
++	label-Verified = -1..+1 group Registered Users
++	label-Verified = -1..+1 group Non-Interactive Users
+ [access "refs/meta/config"]
+ 	exclusiveGroupPermissions = read
+ 	read = group Administrators
+@@ -59,3 +63,9 @@
+ 	value =  0 No score
+ 	value = +1 Looks good to me, but someone else must approve
+ 	value = +2 Looks good to me, approved
++[label "Verified"]
++	function = MaxWithBlock
++	value = -1 Failed
++	value =  0 No score
++	value = +1 Verified
++	defaultValue = 0
+-- 
+2.7.4
+

@@ -1,0 +1,58 @@
+#!/usr/bin/python
+
+import os
+import json, sys
+import string
+from subprocess import Popen, PIPE
+
+def get_parent_changeid(changeid):
+    results = Popen(["ssh", "-p", "29418", username+"@"+server, "gerrit", "query",
+                     "--format", "JSON", "--dependencies", changeid], stdout=PIPE).communicate()[0]
+    parsed = json.loads(results.split("\n")[0])
+    if not parsed.has_key("neededBy"):
+        return None
+    return parsed["neededBy"][-1]["id"]
+
+def check_codereview(changeid):
+    results = Popen(["ssh", "-p", "29418", username+"@"+server, "gerrit", "query",
+                     "--format", "JSON", "--all-approvals", changeid], stdout=PIPE).communicate()[0]
+    parsed = json.loads(results.split("\n")[0])
+    if not parsed["patchSets"][-1].has_key("approvals"):
+        return -1
+
+    reviewed_passed = False
+    for approval in parsed["patchSets"][-1]["approvals"]:
+        if approval["type"] == "Code-Review":
+            if int(approval["value"]) == 2:
+                reviewed_passed = True
+
+    if reviewed_passed == False:
+        return -1
+        
+    commit = parsed["patchSets"][-1]["revision"]
+    print "Try to Submit commit: " + commit
+
+    results, err = Popen(["ssh", "-p", "29418", username+"@"+server,
+                          "gerrit", "review", "--submit", commit], stdout=PIPE, stderr=PIPE).communicate()
+    if err:
+        return -1
+
+    parent_changeid = get_parent_changeid(changeid)
+    if parent_changeid != None:
+        print "Processing Parent-ID: ", parent_changeid
+        check_codereview(parent_changeid)
+
+    return 0;
+
+
+username = "astri"
+server = "localhost"
+
+change = sys.argv[2]
+for x in range(len(sys.argv)):
+    if sys.argv[x] == "--change":
+        change = sys.argv[x+1]
+        break
+
+print "Processing Change-ID: " + change 
+check_codereview(change)
